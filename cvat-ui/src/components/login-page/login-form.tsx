@@ -200,7 +200,7 @@ function LoginFormComponent(props: Props): JSX.Element {
                                 icon={<LoginOutlined />}
                                 onClick={startSSOLogin}
                             >
-                                Continue with XAIC Keycloak
+                                Continue with Keycloak
                             </Button>
                         </Form.Item>
                     )
