@@ -15,8 +15,8 @@ login, CVAT creates a local user. Subsequent logins are associated with the veri
 identity; an existing CVAT account with the same email can be linked without replacing its local
 password.
 
-The adapter requires an email claim and `email_verified: true`. An optional `email_domain` can
-restrict access to users from a trusted domain.
+The adapter requires an email claim. Email verification is not required by this custom integration;
+an optional `email_domain` can restrict access to users from a trusted domain.
 
 ## Authentication configuration
 
@@ -72,8 +72,9 @@ Create an OpenID Connect client in the target Keycloak realm with:
   ```
 
 Use the actual public CVAT scheme and host. For a local HTTP deployment, replace the scheme and
-host accordingly. The client must provide the `openid`, `profile`, and `email` scopes, and users
-must have a verified email address.
+host accordingly. The client must provide the `openid`, `profile`, and `email` scopes. If email
+verification is not enforced in Keycloak, configure `email_domain` to limit access to a trusted
+domain.
 
 ## Helm deployment
 
@@ -159,8 +160,7 @@ docker exec cvat_server python manage.py sync_keycloak_users \
 ```
 
 The command accepts enabled users with an email address, including users whose Keycloak email is
-not verified. Unverified users are imported with an unverified CVAT email and cannot complete SSO
-until Keycloak verifies the address. The command creates or updates the local CVAT user, links the
-Keycloak subject through `SocialAccount`, and creates an active `worker` Membership. Repeated runs
-are idempotent. Email or subject conflicts are skipped and reported; users removed from the
-Keycloak Group are not deleted or disabled in CVAT.
+not verified. The local CVAT email keeps the same verification state. The command creates or
+updates the local CVAT user, links the Keycloak subject through `SocialAccount`, and creates an
+active `worker` Membership. Repeated runs are idempotent. Email or subject conflicts are skipped
+and reported; users removed from the Keycloak Group are not deleted or disabled in CVAT.

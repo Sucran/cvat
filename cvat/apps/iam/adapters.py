@@ -37,8 +37,6 @@ class CVATSocialAccountAdapter(DefaultSocialAccountAdapter):
         email = claims.get("email") or getattr(sociallogin.user, "email", "")
         if not email:
             self._reject("Keycloak did not provide an email address.")
-        if claims.get("email_verified") is not True:
-            self._reject("The Keycloak email address is not verified.")
 
         email = email.strip().lower()
         configured_domain = settings.SSO_IDENTITY_PROVIDER.get("email_domain")
