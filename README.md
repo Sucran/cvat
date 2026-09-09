@@ -60,7 +60,7 @@ XAIC 定制版本新增 Keycloak OIDC 单点登录、本地注册/密码登录�
 Secret 的 Helm 配置支持，同时保持现有 CVAT API Token 和 Session 认证兼容。
 
 详细配置和部署步骤请参阅
-[XAIC Custom Edition authentication guide](https://docs.cvat.ai/docs/account_management/xaic-custom-edition/)。
+[XAIC Custom Edition authentication guide](docs/xaic-custom-edition.md)。
 
 ## Getting Started
 

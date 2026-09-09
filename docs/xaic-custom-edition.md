@@ -1,9 +1,4 @@
----
-title: 'CVAT XAIC Custom Edition'
-linkTitle: 'XAIC Custom Edition'
-weight: 8
-description: 'Configure Keycloak OIDC SSO and basic authentication controls for the CVAT XAIC custom edition'
----
+# CVAT XAIC Custom Edition
 
 The CVAT XAIC custom edition adds server-side Keycloak OpenID Connect (OIDC) authentication
 for deployments that use Keycloak as their central identity provider. Existing CVAT API Token,
@@ -108,8 +103,7 @@ The relevant Helm values are:
 | `cvat.backend.server.authConfig.key` | `auth_config.yml` | Key in the Secret to mount. |
 | `cvat.backend.server.authConfig.mountPath` | `/home/django/auth_config.yml` | Container path. |
 
-See [`helm-chart/README.md`](https://github.com/XiamenAIInnovationCenter/cvat/blob/develop/helm-chart/README.md)
-for the chart-specific instructions.
+See [`helm-chart/README.md`](../helm-chart/README.md) for the chart-specific instructions.
 
 ## Operational notes
 
