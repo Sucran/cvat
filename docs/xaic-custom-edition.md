@@ -112,3 +112,53 @@ See [`helm-chart/README.md`](../helm-chart/README.md) for the chart-specific ins
   trailing slash.
 - Keep the Keycloak issuer reachable from the CVAT backend container.
 - Treat the client secret and the authentication Secret as production credentials.
+
+## Synchronizing Keycloak users to CVAT
+
+The backend includes a Django management command for a manual, one-way synchronization from a
+Keycloak Group. It does not add an HTTP API or change the CVAT frontend.
+
+Create a separate confidential Keycloak client for synchronization. Enable its service account and
+grant the service account only the `query-users`, `view-users`, and `query-groups` roles from the
+`realm-management` client. Do not use the public/browser login client for this operation.
+
+Add the synchronization client credentials to the Keycloak provider in `auth_config.yml`:
+
+```yaml
+sso:
+  identity_providers:
+    - id: keycloak
+      # Existing OIDC login settings remain here.
+      sync_client_id: cvat-user-sync
+      sync_client_secret: <sync-client-secret>
+```
+
+List groups and eligible users without changing CVAT:
+
+```bash
+docker exec cvat_server python manage.py sync_keycloak_users --list-groups
+docker exec cvat_server python manage.py sync_keycloak_users \
+  --group /CVAT/Users --list --json
+```
+
+Synchronize selected users to CVAT, or add the entire Group to an existing organization:
+
+```bash
+docker exec cvat_server python manage.py sync_keycloak_users \
+  --group /CVAT/Users \
+  --organization annotators \
+  --user alice@example.com \
+  --user bob@example.com \
+  --role worker
+
+docker exec cvat_server python manage.py sync_keycloak_users \
+  --group /CVAT/Users \
+  --organization annotators \
+  --all-group-users \
+  --dry-run
+```
+
+The command only accepts enabled users with verified email addresses. It creates or updates the
+local CVAT user, links the Keycloak subject through `SocialAccount`, and creates an active
+`worker` Membership. Repeated runs are idempotent. Email or subject conflicts are skipped and
+reported; users removed from the Keycloak Group are not deleted or disabled in CVAT.

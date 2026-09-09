@@ -42,6 +42,12 @@ def _required_string(value: Any, path: str) -> str:
     return value.strip()
 
 
+def _optional_string(value: Any, path: str) -> str | None:
+    if value is None:
+        return None
+    return _required_string(value, path)
+
+
 def load_auth_config(path: str | None) -> dict[str, Any]:
     """Load and normalize the optional CVAT authentication configuration."""
     config = deepcopy(DEFAULT_AUTH_CONFIG)
@@ -97,6 +103,17 @@ def load_auth_config(path: str | None) -> dict[str, Any]:
 
         for key in ("name", "server_url", "client_id", "client_secret"):
             provider[key] = _required_string(provider.get(key), f"identity provider {key}")
+
+        provider["sync_client_id"] = _optional_string(
+            provider.get("sync_client_id"), "identity provider sync_client_id"
+        )
+        provider["sync_client_secret"] = _optional_string(
+            provider.get("sync_client_secret"), "identity provider sync_client_secret"
+        )
+        if bool(provider["sync_client_id"]) != bool(provider["sync_client_secret"]):
+            raise ImproperlyConfigured(
+                "identity provider sync_client_id and sync_client_secret must be provided together"
+            )
 
         email_domain = provider.get("email_domain")
         if email_domain is not None:

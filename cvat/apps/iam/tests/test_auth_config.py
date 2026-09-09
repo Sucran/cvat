@@ -54,6 +54,21 @@ class AuthenticationConfigTest(SimpleTestCase):
         self.assertEqual(provider["protocol"], "OIDC")
         self.assertEqual(provider["email_domain"], "example.com")
 
+    def test_sync_client_credentials_must_be_configured_together(self):
+        with self.assertRaises(ImproperlyConfigured):
+            self._load("""
+                sso:
+                  enabled: true
+                  identity_providers:
+                    - id: keycloak
+                      protocol: oidc
+                      name: Keycloak
+                      server_url: https://keycloak.example.com/realms/cvat
+                      client_id: cvat
+                      client_secret: secret
+                      sync_client_id: cvat-user-sync
+                """)
+
     def test_enabled_sso_requires_keycloak_configuration(self):
         with self.assertRaises(ImproperlyConfigured):
             self._load("sso:\n  enabled: true\n")
