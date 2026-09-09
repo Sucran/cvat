@@ -56,64 +56,11 @@ For a fully managed setup, annotation services, or enterprise features, see
 
 ## CVAT XAIC 定制版本新增功能
 
-CVAT XAIC 定制版本在 CVAT Community 的基础上增加了面向企业内网部署的统一认证能力，
-同时保留原有 API Token、Django Session 和本地账号机制。
+XAIC 定制版本新增 Keycloak OIDC 单点登录、本地注册/密码登录开关，以及基于 Kubernetes
+Secret 的 Helm 配置支持，同时保持现有 CVAT API Token 和 Session 认证兼容。
 
-### Keycloak OIDC 单点登录
-
-- 支持通过 Keycloak OpenID Connect（OIDC）登录。
-- 使用服务端 Authorization Code Flow，可启用 PKCE；登录成功后复用 CVAT 的 Django Session。
-- 登录页显示通用的 `Continue with Keycloak` 按钮。
-- 首次登录时创建 CVAT 用户，后续登录可关联已有账号。
-- 校验邮箱、`email_verified` 以及可选的邮箱域名限制。
-- Keycloak access token 不保存在浏览器中，现有 API Token 认证行为保持不变。
-
-### Basic 注册和登录开关
-
-通过 `auth_config.yml` 可以分别控制本地账号注册和密码登录：
-
-```yaml
-basic:
-  registration:
-    enabled: false
-  login:
-    enabled: true
-
-sso:
-  enabled: true
-  enable_pkce: true
-  identity_providers:
-    - id: keycloak
-      protocol: OIDC
-      name: Keycloak
-      server_url: https://keycloak.example.com/realms/<realm>/.well-known/openid-configuration
-      client_id: cvat
-      client_secret: <client-secret>
-```
-
-当 `basic.registration.enabled` 为 `false` 时，注册接口和页面入口会被移除；当
-`basic.login.enabled` 为 `false` 时，本地密码登录和密码相关接口会被关闭，但仍可使用
-Keycloak SSO（必须至少保留一种登录方式）。
-
-### Helm 部署配置
-
-生产环境建议将 `auth_config.yml` 存入 Kubernetes Secret，再通过 Helm 引用：
-
-```bash
-kubectl -n <namespace> create secret generic cvat-auth-config \
-  --from-file=auth_config.yml=./auth_config.yml
-
-helm upgrade --install cvat ./helm-chart \
-  --set cvat.backend.server.authConfig.existingSecret=cvat-auth-config
-```
-
-Helm chart 会将 Secret 挂载到 `/home/django/auth_config.yml` 并设置
-`AUTH_CONFIG_PATH`。认证配置和客户端密钥不会写入镜像或 Helm values；完整参数说明见
-[`helm-chart/README.md`](helm-chart/README.md)。
-
-The XAIC custom edition adds the same capabilities for English-speaking deployments:
-Keycloak OIDC SSO, configurable local registration/password login, and Secret-based Helm
-configuration. Existing CVAT API Token and session authentication remain compatible.
+详细配置和部署步骤请参阅
+[XAIC Custom Edition authentication guide](https://docs.cvat.ai/docs/account_management/xaic-custom-edition/)。
 
 ## Getting Started
 
