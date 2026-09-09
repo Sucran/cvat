@@ -123,11 +123,7 @@ class KeycloakAdminClient:
 
     @staticmethod
     def is_eligible_user(user: dict[str, Any]) -> bool:
-        return (
-            bool(user.get("enabled"))
-            and bool(user.get("emailVerified"))
-            and bool(str(user.get("email", "")).strip())
-        )
+        return bool(user.get("enabled")) and bool(str(user.get("email", "")).strip())
 
     def list_groups(self, search: str | None = None) -> list[dict[str, Any]]:
         groups = []
@@ -233,17 +229,17 @@ def _user_summary(user_data: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _ensure_verified_email(user, email: str) -> None:
+def _ensure_email(user, email: str, verified: bool) -> None:
     email_address = (
         EmailAddress.objects.filter(user=user, email__iexact=email).order_by("-primary").first()
     )
     if email_address is None:
         EmailAddress.objects.filter(user=user, primary=True).update(primary=False)
-        EmailAddress.objects.create(user=user, email=email, primary=True, verified=True)
+        EmailAddress.objects.create(user=user, email=email, primary=True, verified=verified)
         return
 
     fields = []
-    if not email_address.verified:
+    if verified and not email_address.verified:
         email_address.verified = True
         fields.append("verified")
     if not email_address.primary:
@@ -337,7 +333,7 @@ def _sync_one_user(
                         uid=subject,
                         extra_data=user_data,
                     )
-                _ensure_verified_email(user, email)
+                _ensure_email(user, email, bool(user_data.get("emailVerified")))
 
                 if organization is not None:
                     membership, membership_created = Membership.objects.get_or_create(

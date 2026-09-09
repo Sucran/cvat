@@ -158,7 +158,9 @@ docker exec cvat_server python manage.py sync_keycloak_users \
   --dry-run
 ```
 
-The command only accepts enabled users with verified email addresses. It creates or updates the
-local CVAT user, links the Keycloak subject through `SocialAccount`, and creates an active
-`worker` Membership. Repeated runs are idempotent. Email or subject conflicts are skipped and
-reported; users removed from the Keycloak Group are not deleted or disabled in CVAT.
+The command accepts enabled users with an email address, including users whose Keycloak email is
+not verified. Unverified users are imported with an unverified CVAT email and cannot complete SSO
+until Keycloak verifies the address. The command creates or updates the local CVAT user, links the
+Keycloak subject through `SocialAccount`, and creates an active `worker` Membership. Repeated runs
+are idempotent. Email or subject conflicts are skipped and reported; users removed from the
+Keycloak Group are not deleted or disabled in CVAT.

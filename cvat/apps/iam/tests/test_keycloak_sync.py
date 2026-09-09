@@ -61,7 +61,7 @@ class KeycloakAdminClientTest(TestCase):
             "Bearer admin-token",
         )
         self.assertTrue(client.is_eligible_user(members[0]))
-        self.assertFalse(client.is_eligible_user({**members[0], "emailVerified": False}))
+        self.assertTrue(client.is_eligible_user({**members[0], "emailVerified": False}))
 
 
 class KeycloakUserSyncTest(TestCase):
@@ -152,6 +152,26 @@ class KeycloakUserSyncTest(TestCase):
 
         self.assertEqual(len(report["conflicts"]), 1)
         self.assertEqual(SocialAccount.objects.count(), 1)
+
+    def test_unverified_email_is_imported_but_remains_unverified(self):
+        report = sync_keycloak_users(
+            [
+                {
+                    "id": "unverified-user-id",
+                    "username": "unverified",
+                    "email": "unverified@example.com",
+                    "enabled": True,
+                    "emailVerified": False,
+                }
+            ],
+            organization_slug="sync-org",
+            role=Membership.WORKER,
+            dry_run=False,
+        )
+
+        user = get_user_model().objects.get(email="unverified@example.com")
+        self.assertEqual(len(report["created"]), 1)
+        self.assertFalse(user.emailaddress_set.get(email="unverified@example.com").verified)
 
     def test_subject_with_conflicting_email_is_reported_as_conflict(self):
         User = get_user_model()
