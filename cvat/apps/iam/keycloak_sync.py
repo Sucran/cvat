@@ -291,10 +291,13 @@ def _sync_one_user(
             created = True
         else:
             linked = account is None
-        if organization is not None and user is not None:
-            membership = Membership.objects.filter(user=user, organization=organization).first()
-            membership_created = membership is None
-            membership_activated = membership is not None and not membership.is_active
+        if organization is not None:
+            if user is None:
+                membership_created = True
+            else:
+                membership = Membership.objects.filter(user=user, organization=organization).first()
+                membership_created = membership is None
+                membership_activated = membership is not None and not membership.is_active
     else:
         try:
             with transaction.atomic():

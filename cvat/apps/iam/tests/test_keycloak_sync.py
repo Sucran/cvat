@@ -173,6 +173,26 @@ class KeycloakUserSyncTest(TestCase):
         self.assertEqual(len(report["created"]), 1)
         self.assertFalse(user.emailaddress_set.get(email="unverified@example.com").verified)
 
+    def test_dry_run_reports_membership_for_new_user(self):
+        report = sync_keycloak_users(
+            [
+                {
+                    "id": "dry-run-user-id",
+                    "username": "dry-run-user",
+                    "email": "dry-run@example.com",
+                    "enabled": True,
+                    "emailVerified": False,
+                }
+            ],
+            organization_slug="sync-org",
+            role=Membership.WORKER,
+            dry_run=True,
+        )
+
+        self.assertEqual(len(report["created"]), 1)
+        self.assertEqual(len(report["memberships_created"]), 1)
+        self.assertFalse(get_user_model().objects.filter(email="dry-run@example.com").exists())
+
     def test_subject_with_conflicting_email_is_reported_as_conflict(self):
         User = get_user_model()
         synced_user = User.objects.create_user(
