@@ -25,16 +25,12 @@ class CVATSocialAccountAdapterTest(SimpleTestCase):
         )
 
     def test_accepts_verified_email_from_allowed_domain(self):
-        sociallogin = self._social_login(
-            {"email": "user@example.com", "email_verified": True}
-        )
+        sociallogin = self._social_login({"email": "user@example.com", "email_verified": True})
 
         self.adapter.pre_social_login(self.request, sociallogin)
 
     def test_rejects_unverified_email(self):
-        sociallogin = self._social_login(
-            {"email": "user@example.com", "email_verified": False}
-        )
+        sociallogin = self._social_login({"email": "user@example.com", "email_verified": False})
 
         with self.assertRaises(ImmediateHttpResponse) as context:
             self.adapter.pre_social_login(self.request, sociallogin)
@@ -42,9 +38,7 @@ class CVATSocialAccountAdapterTest(SimpleTestCase):
         self.assertEqual(context.exception.response.status_code, 403)
 
     def test_rejects_email_from_other_domain(self):
-        sociallogin = self._social_login(
-            {"email": "user@other.example", "email_verified": True}
-        )
+        sociallogin = self._social_login({"email": "user@other.example", "email_verified": True})
 
         with self.assertRaises(ImmediateHttpResponse) as context:
             self.adapter.pre_social_login(self.request, sociallogin)

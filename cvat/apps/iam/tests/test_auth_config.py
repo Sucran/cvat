@@ -27,20 +27,17 @@ class AuthenticationConfigTest(SimpleTestCase):
         self.assertFalse(config["sso"]["enabled"])
 
     def test_basic_registration_can_be_disabled(self):
-        config = self._load(
-            """
+        config = self._load("""
             basic:
               registration:
                 enabled: false
-            """
-        )
+            """)
 
         self.assertFalse(config["basic"]["registration"]["enabled"])
         self.assertTrue(config["basic"]["login"]["enabled"])
 
     def test_enabled_keycloak_provider_is_normalized(self):
-        config = self._load(
-            """
+        config = self._load("""
             sso:
               enabled: true
               identity_providers:
@@ -51,8 +48,7 @@ class AuthenticationConfigTest(SimpleTestCase):
                   client_id: cvat
                   client_secret: secret
                   email_domain: EXAMPLE.COM
-            """
-        )
+            """)
 
         provider = config["sso"]["identity_providers"][0]
         self.assertEqual(provider["protocol"], "OIDC")
@@ -64,22 +60,18 @@ class AuthenticationConfigTest(SimpleTestCase):
 
     def test_invalid_boolean_is_rejected(self):
         with self.assertRaises(ImproperlyConfigured):
-            self._load(
-                """
+            self._load("""
                 basic:
                   registration:
                     enabled: disabled
-                """
-            )
+                """)
 
     def test_configuration_cannot_disable_every_login_method(self):
         with self.assertRaises(ImproperlyConfigured):
-            self._load(
-                """
+            self._load("""
                 basic:
                   login:
                     enabled: false
                 sso:
                   enabled: false
-                """
-            )
+                """)

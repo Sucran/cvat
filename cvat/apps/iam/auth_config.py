@@ -9,7 +9,6 @@ from typing import Any
 import yaml
 from django.core.exceptions import ImproperlyConfigured
 
-
 DEFAULT_AUTH_CONFIG = {
     "basic": {
         "registration": {"enabled": True},
@@ -67,9 +66,7 @@ def load_auth_config(path: str | None) -> dict[str, Any]:
             registration["enabled"], "basic.registration.enabled"
         )
     if "enabled" in login:
-        config["basic"]["login"]["enabled"] = _boolean(
-            login["enabled"], "basic.login.enabled"
-        )
+        config["basic"]["login"]["enabled"] = _boolean(login["enabled"], "basic.login.enabled")
 
     sso = _mapping(root.get("sso"), "sso")
     if "enabled" in sso:
